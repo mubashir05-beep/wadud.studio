@@ -10,12 +10,12 @@ import { ContactSection } from "@/components/sections/contact-section"
 import { MagneticButton } from "@/components/magnetic-button"
 import { useRef, useEffect, useState, useCallback } from "react"
 
-const sectionAccents = [
-  { hex: "#d47a3e", name: "Warm Amber" },
-  { hex: "#10b981", name: "Care Emerald" },
-  { hex: "#3b82f6", name: "Cyber Sapphire" },
-  { hex: "#f43f5e", name: "Crimson Vision" },
-  { hex: "#8b5cf6", name: "Violet Platinum" },
+const sectionFlares = [
+  { primary: "#d47a3e", secondary: "#1b6b50", glow: "rgba(212, 122, 62, 0.35)", name: "Warm Amber" },
+  { primary: "#10b981", secondary: "#059669", glow: "rgba(16, 185, 129, 0.35)", name: "Care Emerald" },
+  { primary: "#3b82f6", secondary: "#06b6d4", glow: "rgba(59, 130, 246, 0.35)", name: "Cyber Sapphire" },
+  { primary: "#f43f5e", secondary: "#fb923c", glow: "rgba(244, 63, 94, 0.35)", name: "Crimson Vision" },
+  { primary: "#8b5cf6", secondary: "#ec4899", glow: "rgba(139, 92, 246, 0.35)", name: "Violet Platinum" },
 ]
 
 function lerpColor(color1: string, color2: string, factor: number): string {
@@ -36,12 +36,25 @@ function lerpColor(color1: string, color2: string, factor: number): string {
 export default function Home() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [currentSection, setCurrentSection] = useState(0)
-  const [accentColor, setAccentColor] = useState(sectionAccents[0].hex)
+  const [accentColor, setAccentColor] = useState(sectionFlares[0].primary)
+  const [secondaryAccent, setSecondaryAccent] = useState(sectionFlares[0].secondary)
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isLoaded, setIsLoaded] = useState(false)
   const touchStartY = useRef(0)
   const touchStartX = useRef(0)
   const shaderContainerRef = useRef<HTMLDivElement>(null)
   const scrollThrottleRef = useRef<number>()
+
+  // Mouse reactivity tracking
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 2
+      const y = (e.clientY / window.innerHeight - 0.5) * 2
+      setMousePos({ x, y })
+    }
+    window.addEventListener("mousemove", handleMouseMove, { passive: true })
+    return () => window.removeEventListener("mousemove", handleMouseMove)
+  }, [])
 
   useEffect(() => {
     const checkShaderReady = () => {
@@ -73,7 +86,7 @@ export default function Home() {
     }
   }, [])
 
-  const scrollToSection = (index: number) => {
+  const scrollToSection = useCallback((index: number) => {
     if (scrollContainerRef.current) {
       const sectionWidth = scrollContainerRef.current.offsetWidth
       scrollContainerRef.current.scrollTo({
@@ -82,7 +95,24 @@ export default function Home() {
       })
       setCurrentSection(index)
     }
-  }
+  }, [])
+
+  // Keyboard navigation reactivity
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" || e.key === "PageDown") {
+        if (currentSection < sectionFlares.length - 1) {
+          scrollToSection(currentSection + 1)
+        }
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        if (currentSection > 0) {
+          scrollToSection(currentSection - 1)
+        }
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [currentSection, scrollToSection])
 
   const handleContinuousScroll = useCallback(() => {
     if (!scrollContainerRef.current) return
@@ -91,17 +121,19 @@ export default function Home() {
     if (!sectionWidth) return
 
     const scrollLeft = container.scrollLeft
-    const rawProgress = Math.max(0, Math.min(scrollLeft / sectionWidth, sectionAccents.length - 1))
+    const rawProgress = Math.max(0, Math.min(scrollLeft / sectionWidth, sectionFlares.length - 1))
     
     const index0 = Math.floor(rawProgress)
-    const index1 = Math.min(index0 + 1, sectionAccents.length - 1)
+    const index1 = Math.min(index0 + 1, sectionFlares.length - 1)
     const factor = rawProgress - index0
 
-    const interpolatedAccent = lerpColor(sectionAccents[index0].hex, sectionAccents[index1].hex, factor)
-    setAccentColor(interpolatedAccent)
+    const interpolatedPrimary = lerpColor(sectionFlares[index0].primary, sectionFlares[index1].primary, factor)
+    const interpolatedSecondary = lerpColor(sectionFlares[index0].secondary, sectionFlares[index1].secondary, factor)
+    setAccentColor(interpolatedPrimary)
+    setSecondaryAccent(interpolatedSecondary)
 
     const newSection = Math.round(rawProgress)
-    if (newSection !== currentSection && newSection >= 0 && newSection < sectionAccents.length) {
+    if (newSection !== currentSection && newSection >= 0 && newSection < sectionFlares.length) {
       setCurrentSection(newSection)
     }
   }, [currentSection])
@@ -147,7 +179,7 @@ export default function Home() {
         container.removeEventListener("touchend", handleTouchEnd)
       }
     }
-  }, [currentSection])
+  }, [currentSection, scrollToSection])
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -202,62 +234,87 @@ export default function Home() {
     }
   }, [handleContinuousScroll])
 
+  const activeFlare = sectionFlares[currentSection] || sectionFlares[0]
+
   return (
     <main className="relative h-screen w-full overflow-hidden bg-black text-white selection:bg-white selection:text-black">
       <CustomCursor />
       <GrainOverlay />
 
-      {/* Smooth Minimal Ambient Accent Glow (Low Opacity) */}
+      {/* Smooth Ambient Accent Glow */}
       <div
-        className="pointer-events-none fixed inset-0 z-0 transition-colors duration-500 ease-linear"
+        className="pointer-events-none fixed inset-0 z-0 transition-all duration-700 ease-out"
         style={{
-          background: `radial-gradient(circle at ${currentSection * 20 + 20}% 40%, ${accentColor}18 0%, transparent 50%)`,
+          background: `radial-gradient(circle at ${50 + mousePos.x * 15}% ${50 + mousePos.y * 15}%, ${accentColor}30 0%, transparent 60%)`,
         }}
       />
 
-      {/* Shader Background (Dominant Pure Black + Low Intensity Secondary Accent) */}
+      {/* Reactive WebGL Shader Background */}
       <div
         ref={shaderContainerRef}
-        className={`fixed inset-0 z-0 transition-opacity duration-1000 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+        className={`fixed inset-0 z-0 transition-opacity duration-1000 ${isLoaded ? "opacity-90" : "opacity-0"}`}
         style={{ contain: "strict" }}
       >
         <Shader className="h-full w-full">
           <Swirl
-            colorA="#000000"
-            colorB={accentColor}
-            speed={0.3}
-            detail={0.5}
-            blend={85}
-            coarseX={30}
-            coarseY={30}
-            mediumX={30}
-            mediumY={30}
-            fineX={30}
-            fineY={30}
+            colorA={accentColor}
+            colorB={secondaryAccent}
+            speed={0.7}
+            detail={0.8}
+            blend={55}
+            coarseX={40 + mousePos.x * 15}
+            coarseY={40 + mousePos.y * 15}
+            mediumX={40 + mousePos.x * 10}
+            mediumY={40 + mousePos.y * 10}
+            fineX={40}
+            fineY={40}
           />
           <ChromaFlow
-            baseColor="#000000"
-            upColor="#000000"
-            downColor="#000000"
-            leftColor="#050505"
+            baseColor="#080808"
+            upColor={accentColor}
+            downColor="#121212"
+            leftColor={secondaryAccent}
             rightColor={accentColor}
-            intensity={0.35}
-            radius={1.4}
-            momentum={15}
+            intensity={0.85 + Math.abs(mousePos.x) * 0.15}
+            radius={1.8}
+            momentum={25}
             maskType="alpha"
-            opacity={0.7}
+            opacity={0.92}
           />
         </Shader>
-        <div className="absolute inset-0 bg-black/85 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-black/55 backdrop-blur-[1px]" />
       </div>
 
-      {/* Clean Minimal Nav */}
+      {/* Clean Header Nav */}
       <nav
-        className={`fixed left-0 right-0 top-0 z-50 flex items-center justify-center px-6 py-6 transition-opacity duration-700 md:px-12 ${
+        className={`fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-6 transition-opacity duration-700 md:px-12 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
       >
-        <div className="flex items-center gap-8">
+        <button
+          onClick={() => scrollToSection(0)}
+          className="flex items-center gap-3 transition-transform hover:scale-105"
+        >
+          <div
+            className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 backdrop-blur-md border border-white/20 font-bold text-xl transition-all duration-500 hover:scale-110"
+            style={{ borderColor: `${accentColor}80`, color: accentColor }}
+          >
+            W
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="font-sans text-xl font-bold tracking-tight text-white">
+              Wadud<span className="font-light" style={{ color: accentColor }}>.studio</span>
+            </span>
+            <span
+              className="font-mono text-[10px] tracking-widest uppercase transition-colors duration-700 font-semibold"
+              style={{ color: accentColor }}
+            >
+              ودود · The Loving
+            </span>
+          </div>
+        </button>
+
+        <div className="hidden items-center gap-8 md:flex">
           {["Home", "Ecosystem", "Pillars", "Vision", "Contact"].map((item, index) => (
             <button
               key={item}
@@ -268,13 +325,19 @@ export default function Home() {
             >
               {item}
               <span
-                className={`absolute -bottom-1 left-0 h-0.5 bg-white transition-all duration-300 ${
-                  currentSection === index ? "w-full" : "w-0 group-hover:w-full"
-                }`}
+                className="absolute -bottom-1 left-0 h-0.5 transition-all duration-500"
+                style={{
+                  backgroundColor: accentColor,
+                  width: currentSection === index ? "100%" : "0%",
+                }}
               />
             </button>
           ))}
         </div>
+
+        <MagneticButton variant="primary" onClick={() => window.open("https://wadud.care", "_blank")}>
+          Wadud Care
+        </MagneticButton>
       </nav>
 
       {/* Snap Scroll Container */}
@@ -286,21 +349,25 @@ export default function Home() {
         }`}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {/* Section 0: Hero Section (Pure White Primary) */}
+        {/* Section 0: Hero Section */}
         <section className="flex h-screen w-screen shrink-0 snap-start snap-always flex-col justify-center px-6 md:px-12 lg:px-16">
           <div className="mx-auto w-full max-w-6xl">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 backdrop-blur-md">
-              <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
-              <p className="font-mono text-xs text-white mix-blend-difference">
-                AI & Tech for Societal Good · Privacy First
-              </p>
+            <div
+              className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 backdrop-blur-md transition-all duration-700"
+              style={{ borderColor: `${accentColor}60` }}
+            >
+              <span
+                className="h-2 w-2 rounded-full animate-pulse"
+                style={{ backgroundColor: accentColor }}
+              />
+              <p className="font-mono text-xs text-white/90">AI & Tech for Societal Good · Privacy First</p>
             </div>
 
-            <h1 className="mb-4 font-sans text-4xl font-extralight tracking-tight text-white mix-blend-difference md:text-7xl lg:text-8xl">
-              Technology built for <span className="font-normal text-white">societal betterment</span>.
+            <h1 className="mb-4 font-sans text-4xl font-extralight tracking-tight text-white md:text-7xl lg:text-8xl">
+              Technology built for <span className="font-normal" style={{ color: accentColor }}>societal betterment</span>.
             </h1>
 
-            <p className="mb-8 max-w-3xl text-base font-light text-white/80 mix-blend-difference md:text-xl">
+            <p className="mb-8 max-w-3xl text-base font-light text-white/80 md:text-xl">
               Privacy-first AI platforms designed for real human empowerment, safety, and genuine care.
             </p>
 
@@ -320,16 +387,29 @@ export default function Home() {
         </section>
 
         {/* Section 1: Ecosystem */}
-        <WorkSection />
+        <WorkSection activeFlare={activeFlare} />
 
         {/* Section 2: Pillars */}
-        <ServicesSection />
+        <ServicesSection activeFlare={activeFlare} />
 
         {/* Section 3: Vision */}
-        <AboutSection scrollToSection={scrollToSection} />
+        <AboutSection scrollToSection={scrollToSection} activeFlare={activeFlare} />
 
         {/* Section 4: Contact */}
-        <ContactSection />
+        <ContactSection activeFlare={activeFlare} />
+      </div>
+
+      {/* Floating Section Tracker & Interactive Key Guide */}
+      <div className="fixed bottom-6 right-6 z-50 hidden items-center gap-4 rounded-full border border-white/15 bg-black/70 px-5 py-2.5 backdrop-blur-md md:flex transition-all duration-700">
+        <div
+          className="h-2.5 w-2.5 rounded-full animate-pulse transition-colors duration-700"
+          style={{ backgroundColor: accentColor }}
+        />
+        <span className="font-mono text-xs uppercase tracking-wider font-medium text-white">
+          {activeFlare.name}
+        </span>
+        <span className="font-mono text-xs text-white/40">/</span>
+        <span className="font-mono text-xs font-semibold text-white">0{currentSection + 1} of 05</span>
       </div>
 
       <style jsx global>{`
@@ -340,5 +420,6 @@ export default function Home() {
     </main>
   )
 }
+
 
 

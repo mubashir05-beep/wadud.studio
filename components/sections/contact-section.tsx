@@ -5,11 +5,12 @@ import { useReveal } from "@/hooks/use-reveal"
 import { useState, type FormEvent } from "react"
 import { MagneticButton } from "@/components/magnetic-button"
 
-export function ContactSection() {
+export function ContactSection({ activeFlare }: { activeFlare?: { primary: string; secondary: string } }) {
   const { ref, isVisible } = useReveal(0.3)
   const [formData, setFormData] = useState({ name: "", email: "", message: "" })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const flareColor = activeFlare?.primary || "#8b5cf6"
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -39,10 +40,10 @@ export function ContactSection() {
                 isVisible ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
               }`}
             >
-              <h2 className="mb-2 font-sans text-4xl font-extralight tracking-tight text-white mix-blend-difference md:text-7xl lg:text-8xl">
-                Let's build <span className="font-normal text-white">together</span>
+              <h2 className="mb-2 font-sans text-4xl font-extralight tracking-tight text-white md:text-7xl lg:text-8xl">
+                Let's build <span className="font-normal" style={{ color: flareColor }}>together</span>
               </h2>
-              <p className="font-mono text-xs text-white/70 mix-blend-difference md:text-sm">
+              <p className="font-mono text-xs text-white/70 md:text-sm">
                 / Connect with Wadud.studio
               </p>
             </div>
@@ -55,11 +56,11 @@ export function ContactSection() {
                 style={{ transitionDelay: "150ms" }}
               >
                 <div className="mb-1 flex items-center gap-2">
-                  <span className="font-mono text-xs font-semibold text-white mix-blend-difference">
+                  <span className="font-mono text-xs font-semibold" style={{ color: flareColor }}>
                     Founder
                   </span>
                 </div>
-                <p className="text-base font-medium text-white mix-blend-difference md:text-xl">
+                <p className="text-base font-medium text-white md:text-xl">
                   Muhammad Mubashir Munir Khan
                 </p>
               </div>
@@ -72,10 +73,10 @@ export function ContactSection() {
                 style={{ transitionDelay: "250ms" }}
               >
                 <div className="mb-1 flex items-center gap-2">
-                  <Mail className="h-3.5 w-3.5 text-white" />
-                  <span className="font-mono text-xs text-white/70 mix-blend-difference">Email</span>
+                  <Mail className="h-3.5 w-3.5 transition-colors duration-500" style={{ color: flareColor }} />
+                  <span className="font-mono text-xs text-white/70">Email</span>
                 </div>
-                <p className="text-base text-white transition-colors group-hover:text-white/80 mix-blend-difference md:text-xl">
+                <p className="text-base text-white transition-colors group-hover:text-white/80 md:text-xl">
                   contact.muhammadmubashir@gmail.com
                 </p>
               </a>
@@ -87,10 +88,10 @@ export function ContactSection() {
                 style={{ transitionDelay: "350ms" }}
               >
                 <div className="mb-1 flex items-center gap-2">
-                  <MapPin className="h-3.5 w-3.5 text-white" />
-                  <span className="font-mono text-xs text-white/70 mix-blend-difference">Headquarters</span>
+                  <MapPin className="h-3.5 w-3.5 transition-colors duration-500" style={{ color: flareColor }} />
+                  <span className="font-mono text-xs text-white/70">Headquarters</span>
                 </div>
-                <p className="text-base text-white mix-blend-difference md:text-xl">Islamabad, Pakistan</p>
+                <p className="text-base text-white md:text-xl">Islamabad, Pakistan</p>
               </div>
 
               <div
@@ -109,7 +110,8 @@ export function ContactSection() {
                     href={item.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="border-b border-white/30 font-mono text-xs text-white transition-all hover:border-white mix-blend-difference"
+                    className="border-b border-white/30 font-mono text-xs text-white transition-all hover:border-white"
+                    style={{ borderColor: `${flareColor}60` }}
                   >
                     {item.name}
                   </a>
@@ -118,7 +120,7 @@ export function ContactSection() {
             </div>
           </div>
 
-          {/* Right side - Text Fields with Difference Filter */}
+          {/* Right side - Interactive Form */}
           <div className="flex flex-col justify-center">
             <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
               <div
@@ -127,7 +129,7 @@ export function ContactSection() {
                 }`}
                 style={{ transitionDelay: "200ms" }}
               >
-                <label className="mb-1 block font-mono text-xs text-white/70 mix-blend-difference md:mb-1.5">
+                <label className="mb-1 block font-mono text-xs text-white/70 md:mb-1.5">
                   Name
                 </label>
                 <input
@@ -135,7 +137,8 @@ export function ContactSection() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
-                  className="w-full border-b border-white/40 bg-transparent py-1.5 text-sm text-white placeholder:text-white/40 focus:border-white focus:outline-none mix-blend-difference backdrop-blur-sm md:py-2 md:text-base"
+                  className="w-full border-b border-white/20 bg-transparent py-1.5 text-sm text-white placeholder:text-white/30 transition-all duration-300 focus:outline-none backdrop-blur-sm md:py-2 md:text-base"
+                  style={{ borderColor: `${flareColor}60` }}
                   placeholder="Your name"
                 />
               </div>
@@ -146,7 +149,7 @@ export function ContactSection() {
                 }`}
                 style={{ transitionDelay: "350ms" }}
               >
-                <label className="mb-1 block font-mono text-xs text-white/70 mix-blend-difference md:mb-1.5">
+                <label className="mb-1 block font-mono text-xs text-white/70 md:mb-1.5">
                   Email
                 </label>
                 <input
@@ -154,7 +157,8 @@ export function ContactSection() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
-                  className="w-full border-b border-white/40 bg-transparent py-1.5 text-sm text-white placeholder:text-white/40 focus:border-white focus:outline-none mix-blend-difference backdrop-blur-sm md:py-2 md:text-base"
+                  className="w-full border-b border-white/20 bg-transparent py-1.5 text-sm text-white placeholder:text-white/30 transition-all duration-300 focus:outline-none backdrop-blur-sm md:py-2 md:text-base"
+                  style={{ borderColor: `${flareColor}60` }}
                   placeholder="your@email.com"
                 />
               </div>
@@ -165,7 +169,7 @@ export function ContactSection() {
                 }`}
                 style={{ transitionDelay: "500ms" }}
               >
-                <label className="mb-1 block font-mono text-xs text-white/70 mix-blend-difference md:mb-1.5">
+                <label className="mb-1 block font-mono text-xs text-white/70 md:mb-1.5">
                   Message
                 </label>
                 <textarea
@@ -173,7 +177,8 @@ export function ContactSection() {
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   required
-                  className="w-full border-b border-white/40 bg-transparent py-1.5 text-sm text-white placeholder:text-white/40 focus:border-white focus:outline-none mix-blend-difference backdrop-blur-sm md:py-2 md:text-base"
+                  className="w-full border-b border-white/20 bg-transparent py-1.5 text-sm text-white placeholder:text-white/30 transition-all duration-300 focus:outline-none backdrop-blur-sm md:py-2 md:text-base"
+                  style={{ borderColor: `${flareColor}60` }}
                   placeholder="Tell us how you would like to collaborate..."
                 />
               </div>
@@ -193,7 +198,7 @@ export function ContactSection() {
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </MagneticButton>
                 {submitSuccess && (
-                  <p className="mt-3 text-center font-mono text-xs text-white mix-blend-difference">
+                  <p className="mt-3 text-center font-mono text-xs text-white">
                     Message sent successfully.
                   </p>
                 )}

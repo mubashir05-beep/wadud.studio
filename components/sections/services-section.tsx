@@ -2,8 +2,9 @@
 
 import { useReveal } from "@/hooks/use-reveal"
 
-export function ServicesSection() {
+export function ServicesSection({ activeFlare }: { activeFlare?: { primary: string; secondary: string } }) {
   const { ref, isVisible } = useReveal(0.3)
+  const flareColor = activeFlare?.primary || "#3b82f6"
 
   return (
     <section
@@ -16,10 +17,10 @@ export function ServicesSection() {
             isVisible ? "translate-y-0 opacity-100" : "-translate-y-12 opacity-0"
           }`}
         >
-          <h2 className="mb-1 font-sans text-4xl font-extralight tracking-tight text-white mix-blend-difference md:text-6xl lg:text-7xl">
+          <h2 className="mb-1 font-sans text-4xl font-extralight tracking-tight text-white md:text-6xl lg:text-7xl">
             Core Pillars
           </h2>
-          <p className="font-mono text-xs text-white/70 mix-blend-difference md:text-sm">
+          <p className="font-mono text-xs text-white/70 md:text-sm">
             / Principles built into every Wadud product
           </p>
         </div>
@@ -47,7 +48,7 @@ export function ServicesSection() {
               direction: "bottom",
             },
           ].map((service, i) => (
-            <ServiceCard key={i} service={service} index={i} isVisible={isVisible} />
+            <ServiceCard key={i} service={service} index={i} isVisible={isVisible} flareColor={flareColor} />
           ))}
         </div>
       </div>
@@ -59,10 +60,12 @@ function ServiceCard({
   service,
   index,
   isVisible,
+  flareColor,
 }: {
   service: { title: string; description: string; direction: string }
   index: number
   isVisible: boolean
+  flareColor: string
 }) {
   const getRevealClass = () => {
     if (!isVisible) {
@@ -84,19 +87,24 @@ function ServiceCard({
 
   return (
     <div
-      className={`group transition-all duration-700 ${getRevealClass()}`}
+      className={`group rounded-xl p-4 transition-all duration-500 hover:bg-white/5 hover:border border-transparent hover:border-white/10 ${getRevealClass()}`}
       style={{
         transitionDelay: `${index * 120}ms`,
       }}
     >
       <div className="mb-2 flex items-center gap-3">
-        <div className="h-px w-8 bg-white transition-all duration-300 group-hover:w-12" />
-        <span className="font-mono text-xs font-bold text-white">
+        <div
+          className="h-px w-8 transition-all duration-300 group-hover:w-14"
+          style={{ backgroundColor: flareColor }}
+        />
+        <span className="font-mono text-xs font-bold transition-colors duration-500" style={{ color: flareColor }}>
           0{index + 1}
         </span>
       </div>
-      <h3 className="mb-1 font-sans text-xl font-light text-white mix-blend-difference md:text-3xl">{service.title}</h3>
-      <p className="truncate font-mono text-xs text-white/70 mix-blend-difference md:text-sm">{service.description}</p>
+      <h3 className="mb-1 font-sans text-xl font-light text-white md:text-3xl transition-transform duration-300 group-hover:translate-x-1">
+        {service.title}
+      </h3>
+      <p className="truncate font-mono text-xs text-white/70 md:text-sm">{service.description}</p>
     </div>
   )
 }

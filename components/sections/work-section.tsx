@@ -2,8 +2,9 @@
 
 import { useReveal } from "@/hooks/use-reveal"
 
-export function WorkSection() {
+export function WorkSection({ activeFlare }: { activeFlare?: { primary: string; secondary: string } }) {
   const { ref, isVisible } = useReveal(0.3)
+  const flareColor = activeFlare?.primary || "#10b981"
 
   return (
     <section
@@ -16,10 +17,10 @@ export function WorkSection() {
             isVisible ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
           }`}
         >
-          <h2 className="mb-1 font-sans text-4xl font-extralight tracking-tight text-white mix-blend-difference md:text-6xl lg:text-7xl">
+          <h2 className="mb-1 font-sans text-4xl font-extralight tracking-tight text-white md:text-6xl lg:text-7xl">
             Our Ecosystem
           </h2>
-          <p className="font-mono text-xs text-white/70 mix-blend-difference md:text-sm">
+          <p className="font-mono text-xs text-white/70 md:text-sm">
             / Wadud.studio purpose-built product suite
           </p>
         </div>
@@ -60,7 +61,7 @@ export function WorkSection() {
               status: "Concept",
             },
           ].map((project, i) => (
-            <ProjectCard key={i} project={project} index={i} isVisible={isVisible} />
+            <ProjectCard key={i} project={project} index={i} isVisible={isVisible} flareColor={flareColor} />
           ))}
         </div>
       </div>
@@ -72,10 +73,12 @@ function ProjectCard({
   project,
   index,
   isVisible,
+  flareColor,
 }: {
   project: { number: string; title: string; category: string; year: string; direction: string; status?: string; link?: string }
   index: number
   isVisible: boolean
+  flareColor: string
 }) {
   const getRevealClass = () => {
     if (!isVisible) {
@@ -87,7 +90,7 @@ function ProjectCard({
   return (
     <div
       onClick={() => project.link && window.open(project.link, "_blank")}
-      className={`group flex items-center justify-between border-b border-white/20 py-3.5 transition-all duration-500 hover:border-white cursor-pointer md:py-5 ${getRevealClass()}`}
+      className={`group flex items-center justify-between border-b border-white/10 py-3.5 transition-all duration-500 hover:border-white/50 cursor-pointer rounded-r-xl px-4 hover:bg-white/5 md:py-5 ${getRevealClass()}`}
       style={{
         transitionDelay: `${index * 120}ms`,
         marginLeft: index % 2 === 0 ? "0" : "auto",
@@ -95,16 +98,22 @@ function ProjectCard({
       }}
     >
       <div className="flex items-baseline gap-4 md:gap-8">
-        <span className="font-mono text-sm font-bold text-white md:text-base">
+        <span
+          className="font-mono text-sm font-bold transition-colors duration-500 md:text-base"
+          style={{ color: flareColor }}
+        >
           {project.number}
         </span>
         <div>
           <div className="flex items-center gap-3">
-            <h3 className="mb-0.5 font-sans text-xl font-light text-white transition-transform duration-300 group-hover:translate-x-2 md:text-3xl lg:text-4xl">
+            <h3 className="mb-0.5 font-sans text-xl font-light text-white transition-transform duration-300 group-hover:translate-x-3 md:text-3xl lg:text-4xl">
               {project.title}
             </h3>
             {project.status && (
-              <span className="rounded-full bg-white/15 border border-white/30 px-2.5 py-0.5 font-mono text-[10px] font-medium uppercase text-white">
+              <span
+                className="rounded-full bg-white/10 border px-2.5 py-0.5 font-mono text-[10px] font-medium uppercase transition-colors duration-500"
+                style={{ borderColor: `${flareColor}60`, color: flareColor }}
+              >
                 {project.status}
               </span>
             )}
@@ -112,7 +121,12 @@ function ProjectCard({
           <p className="truncate font-mono text-xs text-white/70 md:text-sm">{project.category}</p>
         </div>
       </div>
-      <span className="font-mono text-xs font-semibold text-white/80 md:text-sm">{project.year}</span>
+      <span
+        className="font-mono text-xs font-semibold transition-colors duration-500 md:text-sm"
+        style={{ color: `${flareColor}ee` }}
+      >
+        {project.year}
+      </span>
     </div>
   )
 }

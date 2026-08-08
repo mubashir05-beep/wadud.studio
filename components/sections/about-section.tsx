@@ -5,10 +5,13 @@ import { useReveal } from "@/hooks/use-reveal"
 
 export function AboutSection({
   scrollToSection,
+  activeFlare,
 }: {
   scrollToSection?: (index: number) => void
+  activeFlare?: { primary: string; secondary: string }
 }) {
   const { ref, isVisible } = useReveal(0.3)
+  const flareColor = activeFlare?.primary || "#f43f5e"
 
   return (
     <section
@@ -24,11 +27,11 @@ export function AboutSection({
                 isVisible ? "translate-y-0 opacity-100" : "-translate-y-12 opacity-0"
               }`}
             >
-              <h2 className="mb-2 font-sans text-4xl font-extralight tracking-tight text-white mix-blend-difference md:text-6xl lg:text-7xl">
+              <h2 className="mb-2 font-sans text-4xl font-extralight tracking-tight text-white md:text-6xl lg:text-7xl">
                 Guided by care. <br className="hidden md:block" />
-                Built for <span className="font-normal text-white">real impact</span>.
+                Built for <span className="font-normal" style={{ color: flareColor }}>real impact</span>.
               </h2>
-              <p className="font-mono text-xs text-white/70 mix-blend-difference md:text-sm">
+              <p className="font-mono text-xs text-white/70 md:text-sm">
                 / Technology for the betterment of others and self
               </p>
             </div>
@@ -39,7 +42,7 @@ export function AboutSection({
               }`}
               style={{ transitionDelay: "200ms" }}
             >
-              <p className="max-w-xl text-base font-light text-white/80 mix-blend-difference md:text-xl">
+              <p className="max-w-xl text-base font-light text-white/80 md:text-xl">
                 Building privacy-first AI platforms that solve real human problems with genuine care, security, and dignity.
               </p>
             </div>
@@ -59,7 +62,7 @@ export function AboutSection({
             </div>
           </div>
 
-          {/* Right side - Stats */}
+          {/* Right side - Interactive Stats */}
           <div className="flex flex-col justify-center space-y-5 md:space-y-8">
             {[
               { value: "230M+", label: "People Impacted", sublabel: "Pakistan first focus & diaspora", direction: "right" },
@@ -76,21 +79,23 @@ export function AboutSection({
               return (
                 <div
                   key={i}
-                  className={`flex items-baseline gap-4 border-l-2 border-white pl-4 transition-all duration-700 md:gap-8 md:pl-8 ${getRevealClass()}`}
+                  className={`group flex items-baseline gap-4 border-l-2 pl-4 transition-all duration-500 hover:scale-105 hover:bg-white/5 rounded-r-xl p-3 md:gap-8 md:pl-8 ${getRevealClass()}`}
                   style={{
+                    borderColor: flareColor,
                     transitionDelay: `${300 + i * 120}ms`,
                     marginLeft: i % 2 === 0 ? "0" : "auto",
                     maxWidth: i % 2 === 0 ? "100%" : "88%",
                   }}
                 >
-                  <div className="text-3xl font-light text-white mix-blend-difference md:text-5xl lg:text-6xl">
+                  <div
+                    className="text-3xl font-light transition-transform duration-300 group-hover:scale-110 md:text-5xl lg:text-6xl"
+                    style={{ color: flareColor }}
+                  >
                     {stat.value}
                   </div>
                   <div>
-                    <div className="font-sans text-base font-medium text-white mix-blend-difference md:text-lg">
-                      {stat.label}
-                    </div>
-                    <div className="font-mono text-xs text-white/70 mix-blend-difference">{stat.sublabel}</div>
+                    <div className="font-sans text-base font-medium text-white md:text-lg">{stat.label}</div>
+                    <div className="font-mono text-xs text-white/60">{stat.sublabel}</div>
                   </div>
                 </div>
               )
