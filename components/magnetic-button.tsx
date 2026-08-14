@@ -58,8 +58,8 @@ export function MagneticButton({
   }
 
   const sizes = {
-    default: "px-6 py-2.5 text-sm",
-    lg: "px-8 py-3.5 text-base",
+    default: "px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm",
+    lg: "px-6 sm:px-8 py-3 sm:py-3.5 text-sm sm:text-base",
   }
 
   return (
@@ -77,10 +77,9 @@ export function MagneticButton({
       `}
       style={{
         transform: "translate3d(0px, 0px, 0)",
-        contain: "layout style paint",
       }}
     >
-      <span className="relative z-10">{children}</span>
+      <span className="relative z-10 flex items-center justify-center gap-1.5">{children}</span>
     </button>
   )
 }

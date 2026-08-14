@@ -9,13 +9,14 @@ import { AboutSection } from "@/components/sections/about-section"
 import { ContactSection } from "@/components/sections/contact-section"
 import { MagneticButton } from "@/components/magnetic-button"
 import { useRef, useEffect, useState, useCallback } from "react"
+import { ArrowUpRight, Menu, X } from "lucide-react"
 
 const sectionFlares = [
-  { primary: "#d47a3e", secondary: "#1b6b50", glow: "rgba(212, 122, 62, 0.35)", name: "Warm Amber" },
-  { primary: "#10b981", secondary: "#059669", glow: "rgba(16, 185, 129, 0.35)", name: "Care Emerald" },
-  { primary: "#3b82f6", secondary: "#06b6d4", glow: "rgba(59, 130, 246, 0.35)", name: "Cyber Sapphire" },
-  { primary: "#f43f5e", secondary: "#fb923c", glow: "rgba(244, 63, 94, 0.35)", name: "Crimson Vision" },
-  { primary: "#8b5cf6", secondary: "#ec4899", glow: "rgba(139, 92, 246, 0.35)", name: "Violet Platinum" },
+  { primary: "#ffffff", secondary: "#404040", glow: "rgba(255, 255, 255, 0.12)", name: "Studio Core" },
+  { primary: "#ffffff", secondary: "#525252", glow: "rgba(255, 255, 255, 0.12)", name: "Wadud Care" },
+  { primary: "#e5e5e5", secondary: "#737373", glow: "rgba(229, 229, 229, 0.12)", name: "Core Pillars" },
+  { primary: "#ffffff", secondary: "#262626", glow: "rgba(255, 255, 255, 0.12)", name: "Studio Vision" },
+  { primary: "#d4d4d4", secondary: "#525252", glow: "rgba(212, 212, 212, 0.12)", name: "Connect" },
 ]
 
 function lerpColor(color1: string, color2: string, factor: number): string {
@@ -40,8 +41,7 @@ export default function Home() {
   const [secondaryAccent, setSecondaryAccent] = useState(sectionFlares[0].secondary)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isLoaded, setIsLoaded] = useState(false)
-  const touchStartY = useRef(0)
-  const touchStartX = useRef(0)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const shaderContainerRef = useRef<HTMLDivElement>(null)
   const scrollThrottleRef = useRef<number>()
 
@@ -87,6 +87,16 @@ export default function Home() {
   }, [])
 
   const scrollToSection = useCallback((index: number) => {
+    setMobileMenuOpen(false)
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      const sections = document.querySelectorAll("section")
+      if (sections[index]) {
+        sections[index].scrollIntoView({ behavior: "smooth", block: "start" })
+        setCurrentSection(index)
+      }
+      return
+    }
+
     if (scrollContainerRef.current) {
       const sectionWidth = scrollContainerRef.current.offsetWidth
       scrollContainerRef.current.scrollTo({
@@ -115,7 +125,7 @@ export default function Home() {
   }, [currentSection, scrollToSection])
 
   const handleContinuousScroll = useCallback(() => {
-    if (!scrollContainerRef.current) return
+    if (!scrollContainerRef.current || typeof window === "undefined" || window.innerWidth < 768) return
     const container = scrollContainerRef.current
     const sectionWidth = container.offsetWidth
     if (!sectionWidth) return
@@ -138,51 +148,32 @@ export default function Home() {
     }
   }, [currentSection])
 
+  // Mobile vertical scroll tracking
   useEffect(() => {
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartY.current = e.touches[0].clientY
-      touchStartX.current = e.touches[0].clientX
-    }
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (Math.abs(e.touches[0].clientY - touchStartY.current) > 10) {
-        e.preventDefault()
-      }
-    }
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      const touchEndY = e.changedTouches[0].clientY
-      const touchEndX = e.changedTouches[0].clientX
-      const deltaY = touchStartY.current - touchEndY
-      const deltaX = touchStartX.current - touchEndX
-
-      if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 50) {
-        if (deltaY > 0 && currentSection < 4) {
-          scrollToSection(currentSection + 1)
-        } else if (deltaY < 0 && currentSection > 0) {
-          scrollToSection(currentSection - 1)
+    if (typeof window === "undefined") return
+    const handleMobileScroll = () => {
+      if (window.innerWidth >= 768) return
+      const sections = document.querySelectorAll("section")
+      const scrollPosition = window.scrollY + window.innerHeight / 3
+      sections.forEach((sec, idx) => {
+        const top = sec.offsetTop
+        const height = sec.offsetHeight
+        if (scrollPosition >= top && scrollPosition < top + height) {
+          setCurrentSection(idx)
+          setAccentColor(sectionFlares[idx]?.primary || "#ffffff")
+          setSecondaryAccent(sectionFlares[idx]?.secondary || "#404040")
         }
-      }
+      })
     }
+    window.addEventListener("scroll", handleMobileScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleMobileScroll)
+  }, [])
 
-    const container = scrollContainerRef.current
-    if (container) {
-      container.addEventListener("touchstart", handleTouchStart, { passive: true })
-      container.addEventListener("touchmove", handleTouchMove, { passive: false })
-      container.addEventListener("touchend", handleTouchEnd, { passive: true })
-    }
-
-    return () => {
-      if (container) {
-        container.removeEventListener("touchstart", handleTouchStart)
-        container.removeEventListener("touchmove", handleTouchMove)
-        container.removeEventListener("touchend", handleTouchEnd)
-      }
-    }
-  }, [currentSection, scrollToSection])
-
+  // Desktop wheel horizontal scrolling
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
+      if (typeof window === "undefined" || window.innerWidth < 768) return
+
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
         e.preventDefault()
 
@@ -211,7 +202,7 @@ export default function Home() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (scrollThrottleRef.current) return
+      if (scrollThrottleRef.current || typeof window === "undefined" || window.innerWidth < 768) return
 
       scrollThrottleRef.current = requestAnimationFrame(() => {
         handleContinuousScroll()
@@ -237,31 +228,31 @@ export default function Home() {
   const activeFlare = sectionFlares[currentSection] || sectionFlares[0]
 
   return (
-    <main className="relative h-screen w-full overflow-hidden bg-black text-white selection:bg-white selection:text-black">
+    <main className="relative min-h-screen md:h-screen w-full overflow-x-hidden md:overflow-hidden bg-black text-white selection:bg-white selection:text-black">
       <CustomCursor />
       <GrainOverlay />
 
-      {/* Smooth Ambient Accent Glow */}
+      {/* Smooth Ambient Monochrome Accent Glow */}
       <div
         className="pointer-events-none fixed inset-0 z-0 transition-all duration-700 ease-out"
         style={{
-          background: `radial-gradient(circle at ${50 + mousePos.x * 15}% ${50 + mousePos.y * 15}%, ${accentColor}30 0%, transparent 60%)`,
+          background: `radial-gradient(circle at ${50 + mousePos.x * 15}% ${50 + mousePos.y * 15}%, rgba(255, 255, 255, 0.08) 0%, transparent 65%)`,
         }}
       />
 
-      {/* Reactive WebGL Shader Background */}
+      {/* Reactive WebGL Monochrome Shader Background */}
       <div
         ref={shaderContainerRef}
-        className={`fixed inset-0 z-0 transition-opacity duration-1000 ${isLoaded ? "opacity-90" : "opacity-0"}`}
+        className={`fixed inset-0 z-0 transition-opacity duration-1000 ${isLoaded ? "opacity-85" : "opacity-0"}`}
         style={{ contain: "strict" }}
       >
         <Shader className="h-full w-full">
           <Swirl
             colorA={accentColor}
             colorB={secondaryAccent}
-            speed={0.7}
+            speed={0.45}
             detail={0.8}
-            blend={55}
+            blend={60}
             coarseX={40 + mousePos.x * 15}
             coarseY={40 + mousePos.y * 15}
             mediumX={40 + mousePos.x * 10}
@@ -270,52 +261,38 @@ export default function Home() {
             fineY={40}
           />
           <ChromaFlow
-            baseColor="#080808"
+            baseColor="#000000"
             upColor={accentColor}
-            downColor="#121212"
+            downColor="#080808"
             leftColor={secondaryAccent}
             rightColor={accentColor}
-            intensity={0.85 + Math.abs(mousePos.x) * 0.15}
-            radius={1.8}
-            momentum={25}
+            intensity={0.65 + Math.abs(mousePos.x) * 0.1}
+            radius={1.7}
+            momentum={20}
             maskType="alpha"
-            opacity={0.92}
+            opacity={0.88}
           />
         </Shader>
-        <div className="absolute inset-0 bg-black/55 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px]" />
       </div>
 
       {/* Clean Header Nav */}
       <nav
-        className={`fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-6 transition-opacity duration-700 md:px-12 ${
+        className={`fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-4 sm:px-6 md:px-12 py-3.5 sm:py-4 md:py-6 bg-black/60 md:bg-transparent backdrop-blur-md md:backdrop-blur-none border-b border-white/10 md:border-none transition-opacity duration-700 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
       >
         <button
           onClick={() => scrollToSection(0)}
-          className="flex items-center gap-3 transition-transform hover:scale-105"
+          className="flex items-center transition-transform hover:opacity-80 cursor-pointer"
         >
-          <div
-            className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 backdrop-blur-md border border-white/20 font-bold text-xl transition-all duration-500 hover:scale-110"
-            style={{ borderColor: `${accentColor}80`, color: accentColor }}
-          >
-            W
-          </div>
-          <div className="flex flex-col text-left">
-            <span className="font-sans text-xl font-bold tracking-tight text-white">
-              Wadud<span className="font-light" style={{ color: accentColor }}>.studio</span>
-            </span>
-            <span
-              className="font-mono text-[10px] tracking-widest uppercase transition-colors duration-700 font-semibold"
-              style={{ color: accentColor }}
-            >
-              ودود · The Loving
-            </span>
-          </div>
+          <span className="font-sans text-xl md:text-2xl font-bold tracking-tight text-white">
+            Wadud<span className="font-light text-white/60">.studio</span>
+          </span>
         </button>
 
         <div className="hidden items-center gap-8 md:flex">
-          {["Home", "Ecosystem", "Pillars", "Vision", "Contact"].map((item, index) => (
+          {["Home", "Projects", "Pillars", "About", "Contact"].map((item, index) => (
             <button
               key={item}
               onClick={() => scrollToSection(index)}
@@ -325,9 +302,8 @@ export default function Home() {
             >
               {item}
               <span
-                className="absolute -bottom-1 left-0 h-0.5 transition-all duration-500"
+                className="absolute -bottom-1 left-0 h-0.5 bg-white transition-all duration-300"
                 style={{
-                  backgroundColor: accentColor,
                   width: currentSection === index ? "100%" : "0%",
                 }}
               />
@@ -335,81 +311,112 @@ export default function Home() {
           ))}
         </div>
 
-        <MagneticButton variant="primary" onClick={() => window.open("https://wadud.care", "_blank")}>
-          Wadud Care
-        </MagneticButton>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <MagneticButton
+            variant="primary"
+            onClick={() => window.open("https://wadud.care", "_blank")}
+          >
+            <span className="flex items-center gap-1.5">
+              <span>wadud.care</span>
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </span>
+          </MagneticButton>
+
+          {/* Mobile Menu Toggle Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="flex md:hidden h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/20"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
       </nav>
 
-      {/* Snap Scroll Container */}
+      {/* Mobile Drawer Overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 flex flex-col justify-between bg-black/95 px-6 pt-24 pb-8 backdrop-blur-xl md:hidden animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex flex-col space-y-4">
+            {["Home", "Projects", "Pillars", "About", "Contact"].map((item, index) => (
+              <button
+                key={item}
+                onClick={() => scrollToSection(index)}
+                className="flex items-center justify-between border-b border-white/10 py-3 text-left font-sans text-xl font-light text-white"
+              >
+                <span>{item}</span>
+                <span className="font-mono text-xs text-white/40">0{index + 1}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="pt-6 border-t border-white/10">
+            <button
+              onClick={() => window.open("https://wadud.care", "_blank")}
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-white bg-white py-3 font-sans text-sm font-semibold text-black"
+            >
+              <span>Visit wadud.care</span>
+              <ArrowUpRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Responsive Scroll Container: Vertical on Mobile, Snap-Horizontal on Desktop */}
       <div
         ref={scrollContainerRef}
         data-scroll-container
-        className={`relative z-10 flex h-screen w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory scroll-smooth transition-opacity duration-700 ${
+        className={`relative z-10 flex flex-col md:flex-row w-full min-h-screen md:h-screen md:overflow-x-auto md:overflow-y-hidden md:snap-x md:snap-mandatory scroll-smooth transition-opacity duration-700 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {/* Section 0: Hero Section */}
-        <section className="flex h-screen w-screen shrink-0 snap-start snap-always flex-col justify-center px-6 md:px-12 lg:px-16">
+        <section className="flex min-h-screen md:h-screen w-full md:w-screen md:shrink-0 md:snap-start md:snap-always flex-col justify-center pt-24 sm:pt-28 pb-16 sm:pb-20 md:py-0 px-4 sm:px-8 md:px-12 lg:px-16">
           <div className="mx-auto w-full max-w-6xl">
-            <div
-              className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 backdrop-blur-md transition-all duration-700"
-              style={{ borderColor: `${accentColor}60` }}
-            >
-              <span
-                className="h-2 w-2 rounded-full animate-pulse"
-                style={{ backgroundColor: accentColor }}
-              />
-              <p className="font-mono text-xs text-white/90">AI & Tech for Societal Good · Privacy First</p>
+            <div className="mb-4 sm:mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 sm:px-4 py-1 sm:py-1.5 backdrop-blur-md max-w-full">
+              <span className="h-1.5 sm:h-2 w-1.5 sm:w-2 rounded-full bg-white animate-pulse shrink-0" />
+              <p className="font-mono text-[11px] sm:text-xs text-white/90 truncate">
+                Currently Building: <span className="text-white font-medium">wadud.care</span> · Privacy-First AI
+              </p>
             </div>
 
-            <h1 className="mb-4 font-sans text-4xl font-extralight tracking-tight text-white md:text-7xl lg:text-8xl">
-              Technology built for <span className="font-normal" style={{ color: accentColor }}>societal betterment</span>.
+            <h1 className="mb-4 sm:mb-5 font-sans text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-extralight tracking-tight text-white leading-tight">
+              Technology built for <span className="font-normal text-white underline decoration-white/30 underline-offset-8">societal betterment</span>.
             </h1>
 
-            <p className="mb-8 max-w-3xl text-base font-light text-white/80 md:text-xl">
-              Privacy-first AI platforms designed for real human empowerment, safety, and genuine care.
+            <p className="mb-6 sm:mb-8 max-w-3xl text-sm sm:text-base md:text-xl font-light text-white/80 leading-relaxed">
+              Wadud.studio engineers privacy-centric, intelligent platforms rooted in human dignity. We are currently building and scaling <a href="https://wadud.care" target="_blank" rel="noreferrer" className="text-white underline decoration-white/60 hover:decoration-white font-medium">wadud.care</a>, bringing secure doctor consultations and telemedicine to everyone.
             </p>
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
               <MagneticButton
                 size="lg"
                 variant="primary"
                 onClick={() => window.open("https://wadud.care", "_blank")}
               >
-                Explore Wadud Care
+                <span className="flex items-center gap-1.5">
+                  <span>Explore wadud.care</span>
+                  <ArrowUpRight className="h-4 w-4" />
+                </span>
               </MagneticButton>
-              <MagneticButton size="lg" variant="secondary" onClick={() => scrollToSection(3)}>
-                Our Mission
+              <MagneticButton size="lg" variant="secondary" onClick={() => scrollToSection(1)}>
+                View Projects & Roadmap
               </MagneticButton>
             </div>
           </div>
         </section>
 
-        {/* Section 1: Ecosystem */}
+        {/* Section 1: Projects */}
         <WorkSection activeFlare={activeFlare} />
 
         {/* Section 2: Pillars */}
         <ServicesSection activeFlare={activeFlare} />
 
-        {/* Section 3: Vision */}
+        {/* Section 3: About */}
         <AboutSection scrollToSection={scrollToSection} activeFlare={activeFlare} />
 
         {/* Section 4: Contact */}
         <ContactSection activeFlare={activeFlare} />
-      </div>
-
-      {/* Floating Section Tracker & Interactive Key Guide */}
-      <div className="fixed bottom-6 right-6 z-50 hidden items-center gap-4 rounded-full border border-white/15 bg-black/70 px-5 py-2.5 backdrop-blur-md md:flex transition-all duration-700">
-        <div
-          className="h-2.5 w-2.5 rounded-full animate-pulse transition-colors duration-700"
-          style={{ backgroundColor: accentColor }}
-        />
-        <span className="font-mono text-xs uppercase tracking-wider font-medium text-white">
-          {activeFlare.name}
-        </span>
-        <span className="font-mono text-xs text-white/40">/</span>
-        <span className="font-mono text-xs font-semibold text-white">0{currentSection + 1} of 05</span>
       </div>
 
       <style jsx global>{`

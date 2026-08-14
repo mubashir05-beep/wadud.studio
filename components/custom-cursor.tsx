@@ -83,19 +83,17 @@ export function CustomCursor() {
       {/* Outer Ring */}
       <div
         ref={outerRef}
-        className="pointer-events-none fixed left-0 top-0 z-[99999] will-change-transform transition-all duration-150 ease-out"
-        style={{ contain: "layout style paint" }}
+        className="pointer-events-none fixed left-0 top-0 z-[99999] select-none will-change-transform transition-transform duration-75 ease-out"
       >
-        <div className="h-8 w-8 rounded-full border border-white/60 bg-white/10 backdrop-blur-[1px] shadow-[0_0_15px_rgba(255,255,255,0.4)]" />
+        <div className="h-7 w-7 rounded-full border border-white/80 bg-transparent" />
       </div>
 
       {/* Inner Precision Dot */}
       <div
         ref={innerRef}
-        className="pointer-events-none fixed left-0 top-0 z-[99999] will-change-transform"
-        style={{ contain: "layout style paint" }}
+        className="pointer-events-none fixed left-0 top-0 z-[99999] select-none will-change-transform"
       >
-        <div className="h-2 w-2 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.9)]" />
+        <div className="h-1.5 w-1.5 rounded-full bg-white" />
       </div>
     </>
   )

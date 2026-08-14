@@ -1,209 +1,115 @@
 "use client"
 
-import { Mail, MapPin } from "lucide-react"
+import { Mail, MapPin, ArrowUpRight } from "lucide-react"
 import { useReveal } from "@/hooks/use-reveal"
-import { useState, type FormEvent } from "react"
-import { MagneticButton } from "@/components/magnetic-button"
 
 export function ContactSection({ activeFlare }: { activeFlare?: { primary: string; secondary: string } }) {
   const { ref, isVisible } = useReveal(0.3)
-  const [formData, setFormData] = useState({ name: "", email: "", message: "" })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitSuccess, setSubmitSuccess] = useState(false)
-  const flareColor = activeFlare?.primary || "#8b5cf6"
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    if (!formData.name || !formData.email || !formData.message) {
-      return
-    }
-
-    setIsSubmitting(true)
-    await new Promise((resolve) => setTimeout(resolve, 1200))
-    setIsSubmitting(false)
-    setSubmitSuccess(true)
-    setFormData({ name: "", email: "", message: "" })
-    setTimeout(() => setSubmitSuccess(false), 5000)
-  }
+  const founders = [
+    {
+      name: "Muhammad Mubashir Munir Khan",
+      role: "Co-Founder",
+      email: "contact.muhammadmubashir@gmail.com",
+    },
+    {
+      name: "Saifullah Akhtar",
+      role: "Co-Founder",
+      email: "saifullah.akhtar13@gmail.com",
+    },
+    {
+      name: "Abdul Wahab Tahir",
+      role: "Co-Founder",
+      email: "contact.abdulwahabtahir@gmail.com",
+    },
+  ]
 
   return (
     <section
       ref={ref}
-      className="flex h-screen w-screen shrink-0 snap-start snap-always items-center px-6 md:px-12 lg:px-16"
+      className="flex min-h-screen md:h-screen w-full md:w-screen md:shrink-0 md:snap-start md:snap-always flex-col justify-center py-16 sm:py-20 md:py-0 px-4 sm:px-8 md:px-12 lg:px-16"
     >
       <div className="mx-auto w-full max-w-7xl">
-        <div className="grid gap-8 md:grid-cols-[1.2fr_1fr] md:gap-16 lg:gap-24">
-          <div className="flex flex-col justify-center">
-            <div
-              className={`mb-4 transition-all duration-700 md:mb-8 ${
-                isVisible ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
+        <div
+          className={`mb-6 sm:mb-8 transition-all duration-700 md:mb-12 ${
+            isVisible ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
+          }`}
+        >
+          <h2 className="mb-2 font-sans text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-extralight tracking-tight text-white">
+            Let's <span className="font-normal text-white underline decoration-white/30 underline-offset-8">connect</span>
+          </h2>
+          <p className="font-mono text-xs text-white/70 md:text-sm">
+            / Direct founder contact, inquiries & Wadud Care partnerships
+          </p>
+        </div>
+
+        {/* 3 Founders Cards */}
+        <div className="grid gap-3.5 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-6 mb-6 sm:mb-8">
+          {founders.map((founder, i) => (
+            <a
+              key={founder.email}
+              href={`mailto:${founder.email}`}
+              className={`group flex flex-col justify-between rounded-xl sm:rounded-2xl border border-white/15 bg-white/[0.03] p-4.5 sm:p-5 md:p-6 transition-all duration-500 hover:border-white hover:bg-white/[0.08] hover:shadow-[0_0_30px_rgba(255,255,255,0.08)] ${
+                isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
               }`}
+              style={{ transitionDelay: `${150 + i * 80}ms` }}
             >
-              <h2 className="mb-2 font-sans text-4xl font-extralight tracking-tight text-white md:text-7xl lg:text-8xl">
-                Let's build <span className="font-normal" style={{ color: flareColor }}>together</span>
-              </h2>
-              <p className="font-mono text-xs text-white/70 md:text-sm">
-                / Connect with Wadud.studio
-              </p>
-            </div>
-
-            <div className="space-y-4 md:space-y-6">
-              <div
-                className={`transition-all duration-700 ${
-                  isVisible ? "translate-x-0 opacity-100" : "-translate-x-16 opacity-0"
-                }`}
-                style={{ transitionDelay: "150ms" }}
-              >
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="font-mono text-xs font-semibold" style={{ color: flareColor }}>
-                    Founder
+              <div>
+                <div className="mb-3 sm:mb-4 flex items-center justify-between">
+                  <span className="inline-flex items-center rounded-full border border-white/20 bg-white/5 px-2 sm:px-2.5 py-0.5 font-mono text-[9px] sm:text-[10px] uppercase tracking-wider text-white/70">
+                    {founder.role}
                   </span>
+                  <div className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white/60 transition-all duration-300 group-hover:border-white group-hover:bg-white group-hover:text-black">
+                    <ArrowUpRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  </div>
                 </div>
-                <p className="text-base font-medium text-white md:text-xl">
-                  Muhammad Mubashir Munir Khan
-                </p>
+
+                <h3 className="font-sans text-base sm:text-lg md:text-xl font-medium text-white transition-transform duration-300 group-hover:translate-x-1">
+                  {founder.name}
+                </h3>
               </div>
 
-              <a
-                href="mailto:contact.muhammadmubashir@gmail.com"
-                className={`group block transition-all duration-700 ${
-                  isVisible ? "translate-x-0 opacity-100" : "-translate-x-16 opacity-0"
-                }`}
-                style={{ transitionDelay: "250ms" }}
-              >
-                <div className="mb-1 flex items-center gap-2">
-                  <Mail className="h-3.5 w-3.5 transition-colors duration-500" style={{ color: flareColor }} />
-                  <span className="font-mono text-xs text-white/70">Email</span>
-                </div>
-                <p className="text-base text-white transition-colors group-hover:text-white/80 md:text-xl">
-                  contact.muhammadmubashir@gmail.com
-                </p>
-              </a>
-
-              <div
-                className={`transition-all duration-700 ${
-                  isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
-                }`}
-                style={{ transitionDelay: "350ms" }}
-              >
-                <div className="mb-1 flex items-center gap-2">
-                  <MapPin className="h-3.5 w-3.5 transition-colors duration-500" style={{ color: flareColor }} />
-                  <span className="font-mono text-xs text-white/70">Headquarters</span>
-                </div>
-                <p className="text-base text-white md:text-xl">Islamabad, Pakistan</p>
+              <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/10 flex items-center gap-2">
+                <Mail className="h-3.5 w-3.5 text-white/50 group-hover:text-white transition-colors shrink-0" />
+                <span className="font-mono text-[11px] sm:text-xs text-white/70 group-hover:text-white transition-colors truncate">
+                  {founder.email}
+                </span>
               </div>
+            </a>
+          ))}
+        </div>
 
-              <div
-                className={`flex flex-wrap gap-4 pt-2 transition-all duration-700 md:pt-4 ${
-                  isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"
-                }`}
-                style={{ transitionDelay: "450ms" }}
-              >
-                {[
-                  { name: "wadud.care", url: "https://wadud.care" },
-                  { name: "wadud.studio", url: "#" },
-                  { name: "+92 315 489 5362", url: "tel:+923154895362" },
-                ].map((item) => (
-                  <a
-                    key={item.name}
-                    href={item.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="border-b border-white/30 font-mono text-xs text-white transition-all hover:border-white"
-                    style={{ borderColor: `${flareColor}60` }}
-                  >
-                    {item.name}
-                  </a>
-                ))}
-              </div>
-            </div>
+        {/* Studio Info & Quick Links Footer */}
+        <div
+          className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 pt-3.5 sm:pt-4 border-t border-white/10 transition-all duration-700 ${
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+          }`}
+          style={{ transitionDelay: "400ms" }}
+        >
+          <div className="flex items-center gap-2 text-white/70 font-mono text-[11px] sm:text-xs">
+            <MapPin className="h-3.5 w-3.5 text-white/60 shrink-0" />
+            <span>Headquarters: Islamabad, Pakistan</span>
           </div>
 
-          {/* Right side - Interactive Form */}
-          <div className="flex flex-col justify-center">
-            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
-              <div
-                className={`transition-all duration-700 ${
-                  isVisible ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"
-                }`}
-                style={{ transitionDelay: "200ms" }}
-              >
-                <label className="mb-1 block font-mono text-xs text-white/70 md:mb-1.5">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                  className="w-full border-b border-white/20 bg-transparent py-1.5 text-sm text-white placeholder:text-white/30 transition-all duration-300 focus:outline-none backdrop-blur-sm md:py-2 md:text-base"
-                  style={{ borderColor: `${flareColor}60` }}
-                  placeholder="Your name"
-                />
-              </div>
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+            <a
+              href="https://wadud.care"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white bg-white text-black px-3.5 sm:px-4 py-1.5 font-mono text-xs font-semibold hover:bg-neutral-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+            >
+              <span>wadud.care</span>
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </a>
 
-              <div
-                className={`transition-all duration-700 ${
-                  isVisible ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"
-                }`}
-                style={{ transitionDelay: "350ms" }}
-              >
-                <label className="mb-1 block font-mono text-xs text-white/70 md:mb-1.5">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                  className="w-full border-b border-white/20 bg-transparent py-1.5 text-sm text-white placeholder:text-white/30 transition-all duration-300 focus:outline-none backdrop-blur-sm md:py-2 md:text-base"
-                  style={{ borderColor: `${flareColor}60` }}
-                  placeholder="your@email.com"
-                />
-              </div>
-
-              <div
-                className={`transition-all duration-700 ${
-                  isVisible ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"
-                }`}
-                style={{ transitionDelay: "500ms" }}
-              >
-                <label className="mb-1 block font-mono text-xs text-white/70 md:mb-1.5">
-                  Message
-                </label>
-                <textarea
-                  rows={2}
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  required
-                  className="w-full border-b border-white/20 bg-transparent py-1.5 text-sm text-white placeholder:text-white/30 transition-all duration-300 focus:outline-none backdrop-blur-sm md:py-2 md:text-base"
-                  style={{ borderColor: `${flareColor}60` }}
-                  placeholder="Tell us how you would like to collaborate..."
-                />
-              </div>
-
-              <div
-                className={`pt-2 transition-all duration-700 ${
-                  isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
-                }`}
-                style={{ transitionDelay: "650ms" }}
-              >
-                <MagneticButton
-                  variant="primary"
-                  size="lg"
-                  className="w-full disabled:opacity-50"
-                  onClick={isSubmitting ? undefined : undefined}
-                >
-                  {isSubmitting ? "Sending..." : "Send Message"}
-                </MagneticButton>
-                {submitSuccess && (
-                  <p className="mt-3 text-center font-mono text-xs text-white">
-                    Message sent successfully.
-                  </p>
-                )}
-              </div>
-            </form>
+            <a
+              href="https://wadud.studio"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/5 px-3.5 sm:px-4 py-1.5 font-mono text-xs text-white hover:border-white/40 hover:bg-white/10 transition-colors"
+            >
+              <span>wadud.studio</span>
+            </a>
           </div>
         </div>
       </div>

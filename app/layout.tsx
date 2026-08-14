@@ -8,7 +8,7 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Wadud.studio — Tech & AI for the Betterment of Society",
+  title: "Wadud.studio | Tech & AI for Societal Good",
   description: "Wadud.studio builds privacy-first, AI-powered platforms designed for real societal impact, starting with Wadud Care (wadud.care).",
 }
 
